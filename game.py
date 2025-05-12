@@ -11,6 +11,12 @@ class P(Enum):
 class C(Enum):
     White = 0
     Black = 1
+class MoveStatus(Enum):
+    WhitePiece=0,
+    BlackPiece=1,
+    OutOfBounds=2,
+    Empty = 3,
+
 
 class Cell:
     piece = None
@@ -37,6 +43,8 @@ class Piece:
             return str(self.p.value)
 
 
+        def get_move_status(self, board, dir)-> MoveStatus:
+            pass
         def is_blocked(self, board,dir )-> bool:
             pass
 
@@ -47,19 +55,15 @@ class Piece:
             moves = []
             if self.p == P.Pawn:
                 if self.color == C.White:
-                    if not self.is_blocked(board, [0,-1]):
+                    if self.get_move_status(board, [0,-1]) == MoveStatus.Empty :
                         moves.append([0,-1])
-                    if self.enemy_piece(board, [1, -1]):
+                    if self.get_move_status(board, [1, -1])== MoveStatus.BlackPiece:
                         moves.append([1, -1])
-                    if self.enemy_piece(board, [-1, -1]):
+                    if self.get_move_status(board, [-1, -1])== MoveStatus.BlackPiece:
                         moves.append([1, -1])
                     if pos.y == 6:
-
-                        if not self.is_blocked(board, [0,-2]):
+                        if not self.get_move_status(board, [0,-2])== MoveStatus.Empty:
                             moves.append([0,-2])
-
-
-
 
                 if pos.y==0:
                     return
