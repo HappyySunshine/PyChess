@@ -1,0 +1,9 @@
+
+
+print(String.endswith("jovens"))
+
+
+string_03 = "123456789"
+string_04 = "21323467ABC"
+
+print( string_03.isdigit())
