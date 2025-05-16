@@ -12,8 +12,8 @@ class C(Enum):
     White = 0
     Black = 1
 class MoveStatus(Enum):
-    WhitePiece=0,
-    BlackPiece=1,
+    AllyPiece=0,
+    EnemyPiece=1,
     OutOfBounds=2,
     Empty = 3,
 
@@ -32,6 +32,21 @@ class Cell:
         else:
             return "0"
 
+class Vec2:
+    def __init__(self, x,y):
+        self.x = x
+        self.y = y
+
+    def __add__(self, other):
+        """Adds two Vec2 objects component-wise"""
+        if isinstance(other, Vec2):
+            return Vec2(self.x + other.x, self.y + other.y)
+        else:
+            raise TypeError("Operands must be of type Vec2")
+
+    def __repr__(self):
+        """String representation of the vector"""
+        return f"Vec2({self.x}, {self.y})"
 class Piece:
         color= None
         p = None
@@ -43,32 +58,41 @@ class Piece:
             return str(self.p.value)
 
 
-        def get_move_status(self, board, dir)-> MoveStatus:
-            pass
+        def get_move_status(self, pos: Vec2, board, dir: Vec2)-> MoveStatus:
+            new_pos =pos + dir
+            if new_pos.x < 0  or new_pos.x >7 or new_pos.y < 0 or new_pos.y >7:
+                return MoveStatus.OutOfBounds
+            cell = board[new_pos.y][new_pos.x]
+            if cell.piece is None:
+                return MoveStatus.Empty
+            if cell.piece.color != self.color:
+                return  MoveStatus.EnemyPiece
+            return MoveStatus.AllyPiece
         def is_blocked(self, board,dir )-> bool:
             pass
 
         def enemy_piece(self, board, dir)-> bool:
             pass
 
-        def available_moves(self, pos, board):
+        def available_moves(self, pos: Vec2, board)-> list[Vec2]:
             moves = []
             if self.p == P.Pawn:
+                vert = 1
                 if self.color == C.White:
-                    if self.get_move_status(board, [0,-1]) == MoveStatus.Empty :
-                        moves.append([0,-1])
-                    if self.get_move_status(board, [1, -1])== MoveStatus.BlackPiece:
-                        moves.append([1, -1])
-                    if self.get_move_status(board, [-1, -1])== MoveStatus.BlackPiece:
-                        moves.append([1, -1])
-                    if pos.y == 6:
-                        if not self.get_move_status(board, [0,-2])== MoveStatus.Empty:
-                            moves.append([0,-2])
-
-                if pos.y==0:
-                    return
-                if board[pos.x][pos.y-1]
-                moves.append()
+                    vert = -1
+                if self.get_move_status(pos, board, Vec2(0,vert)) == MoveStatus.Empty :
+                    moves.append(Vec2(0,vert))
+                    if self.color == C.White and pos.y == 6:
+                        if self.get_move_status(pos, board,Vec2(0, -2)) == MoveStatus.Empty:
+                            moves.append(Vec2(0,-2))
+                    elif self.color == C.Black and pos.y == 1:
+                        if self.get_move_status(pos, board, Vec2(0, 2)) == MoveStatus.Empty:
+                            moves.append(Vec2(0, 2))
+                if self.get_move_status(pos, board, Vec2(1, vert))== MoveStatus.EnemyPiece:
+                    moves.append(Vec2(1, vert))
+                if self.get_move_status(pos, board, Vec2(-1, vert))== MoveStatus.EnemyPiece:
+                    moves.append(Vec2(-1, vert))
+            return  moves
 
 
 
@@ -88,7 +112,7 @@ class Game:
             for j in range(0,8):
                 p = self.board[i][j]
                 if i==0 or i==7:
-                    color = C.White if i==0 else C.Black
+                    color = C.Black if i==0 else C.White
                     if j==0 or j==7:
                         p.place(Piece(P.Rook, color))
                     if j==1 or j==6:
@@ -100,9 +124,9 @@ class Game:
                     if j ==4:
                         p.place(Piece(P.Queen, color))
                 elif i==1:
-                    p.place(Piece(P.Pawn, C.White))
-                elif i ==6:
                     p.place(Piece(P.Pawn, C.Black))
+                elif i ==6:
+                    p.place(Piece(P.Pawn, C.White))
 
  
     def debug(self):
