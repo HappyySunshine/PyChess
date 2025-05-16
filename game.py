@@ -47,6 +47,12 @@ class Vec2:
     def __repr__(self):
         """String representation of the vector"""
         return f"Vec2({self.x}, {self.y})"
+
+    def __eq__(self, other):
+        """Enable == operator to compare two Vec2 objects"""
+        if isinstance(other, Vec2):
+            return self.x == other.x and self.y == other.y
+        return False
 class Piece:
         color= None
         p = None
@@ -128,7 +134,16 @@ class Game:
                 elif i ==6:
                     p.place(Piece(P.Pawn, C.White))
 
- 
+    def place(self, old_pos, new_pos:Vec2):
+        cell = self.board[old_pos.x][old_pos.y]
+
+        new_cell = new_pos[old_pos.x][old_pos.y]
+        new_cell.piece = cell.piece
+        cell.piece = None
+        pass
+
+    def move(self, pos: Vec2, dir: Vec2):
+        pass
     def debug(self):
         for i in self.board:
             for j in i:

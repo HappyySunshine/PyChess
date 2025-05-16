@@ -85,6 +85,7 @@ class Ui:
         self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
         self.cells = []
         self.game = game
+        self.selected= None
         self.highlights: list[Vec2] = None
         for piece in self.pieces:
             piece.resize(self)
@@ -130,7 +131,11 @@ class Ui:
             x = self.board.x
         pygame.display.flip()
 
-    def get_cell(self, x,y):
+    def get_chess_pos(self, x,y):
+        for i, row in enumerate(self.cells):
+            for j, cell in enumerate(row):
+                if cell.rect.collidepoint(x, y):
+                    return Vec2(j,i)
         pass
     def remove_highlights(self):
         for vec in self.highlights:
@@ -138,7 +143,22 @@ class Ui:
             cell.draw(self.screen)
         self.highlights = None
 
+
+
     def click(self,x,y):
+        if self.selected is not None:
+            vec = self.get_chess_pos(x,y)
+            for pos in self.selected:
+                if pos == vec:
+                    old = self.selected
+                    piece = self.game.board[old.y][old.x]
+                    self.board.move(old, pos)
+                    cell = self.cells[old.y][old.x]
+                    cell.draw(self.screen)
+                    cell = self.cells[pos.y][pos.x]
+                    cell.draw(self.screen)
+                    cell.draw_piece(piece)
+
 
         for i, row in enumerate(self.cells):
             for j,cell in enumerate(row):
