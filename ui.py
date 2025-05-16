@@ -54,7 +54,7 @@ class CellUi:
             pygame.draw.rect(screen, lighter_color, self.rect)
         else:
             pygame.draw.rect(screen, self.color, self.rect)
-        pygame.draw.rect(screen, self.color, self.rect)
+
         border = [0.0, 0.0, 0.0]
         a = 0
         for c in self.color:
@@ -85,6 +85,7 @@ class Ui:
         self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
         self.cells = []
         self.game = game
+        self.highlights: list[Vec2] = None
         for piece in self.pieces:
             piece.resize(self)
 
@@ -131,21 +132,31 @@ class Ui:
 
     def get_cell(self, x,y):
         pass
+    def remove_highlights(self):
+        for vec in self.highlights:
+            cell: CellUi = self.cells[vec.y][vec.x]
+            cell.draw(self.screen)
+        self.highlights = None
 
     def click(self,x,y):
+
         for i, row in enumerate(self.cells):
             for j,cell in enumerate(row):
                 if cell.rect.collidepoint(x,y):
                     cell = self.game.board[i][j]
+                    if self.highlights is not None:
+                        self.remove_highlights()
+
                     if cell.piece is None:
                         return
 
                     piece = cell.piece
                     current_pos = Vec2(j,i)
                     moves = piece.available_moves(current_pos, self.game.board)
+                    self.highlights = []
                     for move in moves:
                         pos = move + current_pos
-                        print(pos)
+                        self.highlights.append(pos)
                         cellui: CellUi = self.cells[pos.y][pos.x]
                         cellui.draw(self.screen, True)
                     pygame.display.flip()
